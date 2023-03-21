@@ -1,2 +1,4 @@
 <h1>Valgrind 42 Network</h1>
-```https://github.com/zakarm/Valgrind_42_Network.git && ./script.sh```
+```
+git clone https://github.com/zakarm/Valgrind_42_Network.git && ./script.sh
+```
