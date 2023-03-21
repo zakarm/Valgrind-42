@@ -2,6 +2,6 @@
 
 ```
 
-git clone https://github.com/zakarm/Valgrind_42_Network.git && ./script.sh
+git clone https://github.com/zakarm/Valgrind_42_Network.git && cd Valgrind_42_Network  && chmod +x script.sh && ./script.sh
 
 ```
