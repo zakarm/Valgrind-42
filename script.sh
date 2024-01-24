@@ -16,48 +16,60 @@ GREEN='\033[1;32m'
 RED='\033[1;31m'
 NC='\033[0m'
 
-printf $GREEN"BY$RED @zmrabet $NC\n"
+print_success() {
+    echo -e "$GREEN$1 √$NC"
+}
 
-ls ~/goinfre > /dev/null 2>&1
-if [ $? -ne 0 ]
-then
-	ln -s /goinfre/$USER $HOME/goinfre > /dev/null 2>&1
+print_error() {
+    echo -e "$RED$1 X$NC"
+}
+
+print_info() {
+    echo -e "$GREEN$1$NC"
+}
+
+print_info "42 @zmrabet"
+
+# Check and create symbolic link for goinfre directory
+if [ ! -e ~/goinfre ]; then
+    ln -s /goinfre/$USER $HOME/goinfre > /dev/null 2>&1
+    print_success "Symbolic link created for goinfre directory"
 fi
 
-echo $PATH | grep "homebrew" > /dev/null
-if [ $? -ne 0 ]
-then
-echo "PATH=$HOME/goinfre/homebrew/bin:$PATH" >> ~/.zshrc
+# Add homebrew to PATH if not already present
+if ! echo $PATH | grep -q "homebrew"; then
+    echo "PATH=$HOME/goinfre/homebrew/bin:$PATH" >> ~/.zshrc
+    print_success "Added homebrew to PATH"
 fi
 
-ls ~/goinfre/homebrew &> /dev/null
-if [ $? -ne 0 ]
-then
-	printf "$GREEN instaling Brew ... $NC "
-	mkdir ~/goinfre/homebrew > /dev/null 2>&1
-	curl --silent -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C ~/goinfre/homebrew > /dev/null 2>&1
-	if [ $? -ne 0 ]
-	then
-		printf " ----> X"
-	else
-		printf "$GREEN ----> √ $NC\n"
-	fi		
+# Check and install homebrew if not present
+if [ ! -e ~/goinfre/homebrew ]; then
+    print_info "Installing Homebrew..."
+    mkdir ~/goinfre/homebrew > /dev/null 2>&1
+    curl --silent -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C ~/goinfre/homebrew > /dev/null 2>&1
+    [ $? -eq 0 ] && print_success "Homebrew installed successfully" || print_error "Failed to install Homebrew"
 fi
+
+# Update PATH
 export PATH="$HOME/goinfre/homebrew/bin:$PATH"
-printf "$GREEN instaling Valgrind ... \n$NC""might take a while $NC \n"
+
+# Install Valgrind using homebrew
+print_info "Installing Valgrind !"
+print_info "......................"
+
 brew tap LouisBrunner/valgrind > /dev/null 2>&1
 
-MAC=`sw_vers | awk 'NR==2{print $2}'`
-if [ $MAC == "10.14.6" ]
-then
-FILE="/goinfre/$USER/homebrew/Library/Taps/louisbrunner/homebrew-valgrind/valgrind.rb"
-sed -i '.bak' '/libtool/d' $FILE
+# Modify valgrind.rb for macOS 10.14.6
+MAC=$(sw_vers | awk 'NR==2{print $2}')
+if [ $MAC == "10.14.6" ]; then
+    FILE="/goinfre/$USER/homebrew/Library/Taps/louisbrunner/homebrew-valgrind/valgrind.rb"
+    sed -i '.bak' '/libtool/d' $FILE
 fi
+
+# Install valgrind
 HOMEBREW_NO_AUTO_UPDATE=1 brew install --HEAD LouisBrunner/valgrind/valgrind
-if [ $? -ne 0 ]
-then
-	printf "ERROR"
-else
-	printf "$GREEN valgrind installed successfully √$NC\n"
-fi
+[ $? -eq 0 ] && print_success "Valgrind installed successfully" || print_error "Failed to install Valgrind"
+
+# Restart shell
 exec zsh
+
